@@ -14,6 +14,8 @@ import org.devcodes.miniprofiler.entries.QueryProfilerEntry;
 import org.devcodes.miniprofiler.entries.RequestProfilerEntry;
 import org.devcodes.miniprofiler.entries.ViewRenderProfilerEntry;
 import org.devcodes.miniprofiler.persistence.ProfilerPersistenceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the profiler sessions.
@@ -32,6 +34,10 @@ public class ProfilerManager {
 	private ProfilerPersistenceService tracePersistenceService;
 	
 	private ThreadLocal<ProfilerSession> session = new ThreadLocal<ProfilerSession>();
+	
+	private boolean logging = false;
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/**
 	 * Profile an arbitrary method call.
@@ -71,7 +77,9 @@ public class ProfilerManager {
 			
 			session.postProfile(entry);
 			
-			System.out.println("["+entry.getTag()+"] "+pjp.getSignature().toShortString());
+			if(this.logging) {
+				logger.trace("["+entry.getTag()+"] "+pjp.getSignature().toShortString());
+			}
 			
 			return ret;
 		}

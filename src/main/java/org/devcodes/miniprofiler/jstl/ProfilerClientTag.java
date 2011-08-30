@@ -5,13 +5,13 @@ import java.io.IOException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 /**
- * A custom JSTL tag which puts all the Javascript stuff for the profiler.
+ * A custom JSTL tag which puts all the Javascript stuff for the profiler browser client.
  * 
  * This should be placed in the &laquo;head&raquo; of an HTML page.
  * 
  * @author Niall Thomson
  */
-public class ProfilerTag extends TagSupport {
+public class ProfilerClientTag extends TagSupport {
 	private static final long serialVersionUID = -6548281178433830541L;
 
 	private String localAssets;
