@@ -10,7 +10,7 @@ import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.AbstractQueryExecutionListener;
 
 /**
- * Indicates to the ProfilerManager when a query is being executed and when it has completed.
+ * An empty data source proxy listener which is used as a pointcut by the AOP stuff.
  * 
  * @author Niall Thomson
  */

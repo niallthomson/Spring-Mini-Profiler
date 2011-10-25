@@ -1,18 +1,20 @@
 package org.devcodes.miniprofiler;
 
 import java.util.Date;
+import java.util.Stack;
 
 import org.devcodes.miniprofiler.entries.IProfilerEntry;
 
-public /**
+/**
  * Stores stuff for the current session, as we need separate profiler data
  * per session.
  * 
  * @author Niall Thomson
  */
-class ProfilerSession {
+public class ProfilerSession {
 	private IProfilerEntry currentEntry;
-	private IProfilerEntry parentEntry;
+	
+	private Stack<IProfilerEntry> stack;
 	
 	private ProfilerRequest request;
 	
@@ -20,6 +22,8 @@ class ProfilerSession {
 
 	public ProfilerSession(String url, String remoteHost, String sessionId, boolean isActive, IProfilerEntry rootEntry) {
 		request = new ProfilerRequest(new Date(), sessionId, url, remoteHost);
+		
+		stack = new Stack<IProfilerEntry>();
 		
 		this.setActive(isActive);
 		this.setRootEntry(rootEntry);
@@ -41,13 +45,14 @@ class ProfilerSession {
 	}
 	
 	private void updateStack(IProfilerEntry entry) {
-		this.parentEntry = getCurrentEntry();
+		IProfilerEntry currentEntry = getCurrentEntry();
+		currentEntry.addChild(entry);
 		
-		entry.setDepth(this.parentEntry.getDepth() + 1);
+		this.stack.push(currentEntry);
+		
+		entry.setDepth(currentEntry.getDepth() + 1);
 		
 		this.setCurrentEntry(entry);
-		
-		this.parentEntry.addChild(entry);
 	}
 
 	public void postProfile(IProfilerEntry entry) throws ProfilerException {
@@ -57,7 +62,7 @@ class ProfilerSession {
 		
 		this.finishTiming();
 		
-		this.setCurrentEntry(this.parentEntry);
+		this.setCurrentEntry(this.stack.pop());
 	}
 	
 	private void finishTiming() {

@@ -1,5 +1,10 @@
 package org.devcodes.miniprofiler.entries;
 
+/**
+ * Profiler entry for an HTTP request.
+ * 
+ * @author Niall Thomson
+ */
 public class RequestProfilerEntry extends AbstractProfilerEntry {
 	private String url;
 

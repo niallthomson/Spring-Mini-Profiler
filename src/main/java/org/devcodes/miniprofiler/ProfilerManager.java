@@ -1,5 +1,6 @@
 package org.devcodes.miniprofiler;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -67,6 +68,14 @@ public class ProfilerManager {
 		return this.doProfile(pjp, newEntry);
 	}
 	
+	public Object profileQueryExecution(ProceedingJoinPoint pjp, List<QueryInfo> queryInfoList) throws Throwable {
+		//List<QueryInfo> queryInfoList = (List<QueryInfo>)pjp.getArgs()[1];
+		
+		QueryProfilerEntry newEntry = new QueryProfilerEntry(queryInfoList);
+		
+		return this.doProfile(pjp, newEntry);
+	}
+	
 	private Object doProfile(ProceedingJoinPoint pjp, IProfilerEntry entry) throws Throwable {
 		ProfilerSession session = this.getProfilerSession();
 		
@@ -85,6 +94,29 @@ public class ProfilerManager {
 		}
 
 		return pjp.proceed();
+	}
+	
+	public Object profileQuery(List<QueryInfo> queryInfoList, Object target,
+			Method method, Object[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ProfilerException {
+		QueryProfilerEntry entry = new QueryProfilerEntry(queryInfoList);
+		
+		ProfilerSession session = this.getProfilerSession();
+		
+		if((session != null) && (session.isActive())) {
+			session.preProfile(entry);
+			
+			Object ret = method.invoke(target, args);
+			
+			session.postProfile(entry);
+			
+			if(this.logging) {
+				logger.trace("["+entry.getTag()+"] "+entry.getDisplayString());
+			}
+			
+			return ret;
+		}
+
+		return method.invoke(target, args);
 	}
 	
 	private ProfilerSession getProfilerSession() {
@@ -141,36 +173,6 @@ public class ProfilerManager {
 		
 		this.session.remove();
 	}
-
-	/**
-	 * Profile a database query.
-	 * 
-	 * @param queryInfoList
-	 * @param target
-	 * @param method
-	 * @param args
-	 * @return
-	 * @throws Throwable
-	 */
-	public Object profileQuery(List<QueryInfo> queryInfoList, Object target, Method method, Object[] args) throws Throwable {
-		QueryProfilerEntry entry = new QueryProfilerEntry(queryInfoList);
-		
-		ProfilerSession session = this.getProfilerSession();
-		
-		if((session != null) && (session.isActive())) {
-			session.preProfile(entry);
-			
-			Object ret = method.invoke(target, args);
-			
-			session.postProfile(entry);
-			
-			System.out.println("["+entry.getTag()+"] "+entry.getQuery());
-			
-			return ret;
-		}
-
-		return method.invoke(target, args);
-	}
 	
 	/**
 	 * Start profiling an arbitrary section of code.
@@ -211,7 +213,7 @@ public class ProfilerManager {
 	 * @param 	description		a description of the code being profiled
 	 * @return					the ProfilerResource which manages stopping the profiler for this section of code
 	 */
-	public ProfilerResource profilerAsResource(String description) {
+	public ProfilerResource profileAsResource(String description) {
 		return new ProfilerResource(this, this.startAdhocProfiling(description));
 	}
 	

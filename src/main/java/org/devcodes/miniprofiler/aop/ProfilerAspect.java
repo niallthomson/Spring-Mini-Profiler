@@ -1,5 +1,10 @@
 package org.devcodes.miniprofiler.aop;
 
+import java.util.List;
+
+import net.ttddyy.dsproxy.ExecutionInfo;
+import net.ttddyy.dsproxy.QueryInfo;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,7 +28,7 @@ import org.devcodes.miniprofiler.ProfilerManager;
 public class ProfilerAspect {
 	private ProfilerManager profilerManager = ProfilerManager.getDefaultInstance();
 	
-	@Pointcut("execution(@org.devcodes.miniprofiler.Profile * *(..))")
+	@Pointcut("execution(@org.devcodes.miniprofiler.annotations.Profile * *(..))")
 	public void profile() {
 	}
 	
@@ -47,7 +52,11 @@ public class ProfilerAspect {
 	public void view() {
 	}
 	
-	@Pointcut("within(@org.devcodes.miniprofiler.ProfilerIgnore *)")
+	@Pointcut("execution(* org.devcodes.miniprofiler.jdbc.ProfilerDataSourceListener+.aroundQuery(..))")
+	public void query() {
+	}
+	
+	@Pointcut("within(@org.devcodes.miniprofiler.annotations.ProfilerIgnore *)")
 	public void profilerIgnore() {
 	}
 	
@@ -56,27 +65,33 @@ public class ProfilerAspect {
 	}
 	
 	@Around("component() && method() && !service() && !controller() && !repository()")
-	public Object traceComponent(ProceedingJoinPoint pjp) throws Throwable {
+	public Object aroundComponentMethod(ProceedingJoinPoint pjp) throws Throwable {
 		return getProfilerManager().profileMethodCall(pjp, "OTHER");
 	}
 	
 	@Around("repository() && method()")
-	public Object traceRepository(ProceedingJoinPoint pjp) throws Throwable {
+	public Object aroundRepositoryMethod(ProceedingJoinPoint pjp) throws Throwable {
 		return getProfilerManager().profileMethodCall(pjp, "REPOSITORY");
 	}
 	
 	@Around("service() && method()")
-	public Object traceService(ProceedingJoinPoint pjp) throws Throwable {
+	public Object aroundServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
 		return getProfilerManager().profileMethodCall(pjp, "SERVICE");
 	}
 	
 	@Around("controller() && method()")
-	public Object traceController(ProceedingJoinPoint pjp) throws Throwable {
+	public Object aroundControllerMethod(ProceedingJoinPoint pjp) throws Throwable {
 		return getProfilerManager().profileMethodCall(pjp, "CONTROLLER");
 	}
 	
+	@Around("query()")
+	public Object aroundQueryExecution(ProceedingJoinPoint pjp) throws Throwable {
+		List<QueryInfo> queryInfoList = (List<QueryInfo>) pjp.getArgs()[1];
+		return getProfilerManager().profileQueryExecution(pjp, queryInfoList);
+	}
+	
 	@Around("view()")
-	public Object traceView(ProceedingJoinPoint pjp) throws Throwable {
+	public Object aroundViewRender(ProceedingJoinPoint pjp) throws Throwable {
 		return getProfilerManager().profileViewRender(pjp, "");
 	}
 

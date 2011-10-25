@@ -1,6 +1,8 @@
 package org.devcodes.miniprofiler.jdbc;
 
-import org.devcodes.miniprofiler.ProfilerManager;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import net.ttddyy.dsproxy.proxy.ProxyDataSource;
 
@@ -11,13 +13,10 @@ import net.ttddyy.dsproxy.proxy.ProxyDataSource;
  * 
  * @author Niall Thomson
  */
-public class ProfilerProxyDataSource extends ProxyDataSource {	
-	public ProfilerProxyDataSource() {
-		setProfilerManager(ProfilerManager.getDefaultInstance());
-	}
-	
-	public void setProfilerManager(ProfilerManager profilerManager) {
-		ProfilerDataSourceListener listener = new ProfilerDataSourceListener();
-		listener.setProfilerManager(profilerManager);
+public class ProfilerProxyDataSource extends ProxyDataSource implements ApplicationContextAware {	
+	@Override
+	public void setApplicationContext(ApplicationContext context)
+			throws BeansException {
+		// 
 	}
 }
