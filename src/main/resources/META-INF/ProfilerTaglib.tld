@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE taglib PUBLIC 
+ "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" 
+ "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_2.dtd">
+<taglib>
+	<tlib-version>1</tlib-version>
+	<jsp-version>1.2</jsp-version>
+	<short-name>Profiler Tag Library</short-name>
+	<uri>http://www.niallthomson.com/tags-profiler</uri>
+	<description>Spring MVC mini-profiler tag library.</description>
+	<tag>
+		<name>profiler-head</name>
+		<tag-class>org.devcodes.miniprofiler.jstl.ProfilerClientTag</tag-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<name>localAssets</name>
+        	<required>false</required>
+        	<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>
