@@ -1,12 +1,9 @@
 package org.devcodes.miniprofiler;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import net.ttddyy.dsproxy.QueryInfo;
 
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.devcodes.miniprofiler.entries.AdHocProfilerEntry;
 import org.devcodes.miniprofiler.entries.IProfilerEntry;
 import org.devcodes.miniprofiler.entries.MethodCallProfilerEntry;
@@ -48,10 +45,10 @@ public class ProfilerManager {
 	 * @return				the return value of the method that was called
 	 * @throws 	Throwable
 	 */
-	public Object profileMethodCall(ProceedingJoinPoint pjp, String tag) throws Throwable {
-		AbstractProfilerEntry newEntry = new MethodCallProfilerEntry(tag, pjp.getTarget().getClass().getSimpleName(), pjp.getSignature().getName());
+	public Object profileMethodCall(IAroundable aroundable, String tag, String simpleName, String methodName) throws Throwable {
+		AbstractProfilerEntry newEntry = new MethodCallProfilerEntry(tag, simpleName, methodName);
 
-		return this.doProfile(pjp, newEntry);
+		return this.doProfile(aroundable, newEntry);
 	}
 	
 	/**
@@ -62,50 +59,25 @@ public class ProfilerManager {
 	 * @return			the return value of the view being rendered
 	 * @throws 	Throwable
 	 */
-	public Object profileViewRender(ProceedingJoinPoint pjp, String view) throws Throwable {
+	public Object profileViewRender(IAroundable aroundable, String view) throws Throwable {
 		IProfilerEntry newEntry = new ViewRenderProfilerEntry(view);
 		
-		return this.doProfile(pjp, newEntry);
+		return this.doProfile(aroundable, newEntry);
 	}
 	
-	public Object profileQueryExecution(ProceedingJoinPoint pjp, List<QueryInfo> queryInfoList) throws Throwable {
-		//List<QueryInfo> queryInfoList = (List<QueryInfo>)pjp.getArgs()[1];
-		
+	public Object profileQueryExecution(IAroundable aroundable, List<QueryInfo> queryInfoList) throws Throwable {
 		QueryProfilerEntry newEntry = new QueryProfilerEntry(queryInfoList);
 		
-		return this.doProfile(pjp, newEntry);
+		return this.doProfile(aroundable, newEntry);
 	}
 	
-	private Object doProfile(ProceedingJoinPoint pjp, IProfilerEntry entry) throws Throwable {
+	private Object doProfile(IAroundable aroundable, IProfilerEntry entry) throws Throwable {
 		ProfilerSession session = this.getProfilerSession();
 		
 		if((session != null) && (session.isActive())) {
 			session.preProfile(entry);
 			
-			Object ret = pjp.proceed();
-			
-			session.postProfile(entry);
-			
-			if(this.logging) {
-				logger.trace("["+entry.getTag()+"] "+pjp.getSignature().toShortString());
-			}
-			
-			return ret;
-		}
-
-		return pjp.proceed();
-	}
-	
-	public Object profileQuery(List<QueryInfo> queryInfoList, Object target,
-			Method method, Object[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ProfilerException {
-		QueryProfilerEntry entry = new QueryProfilerEntry(queryInfoList);
-		
-		ProfilerSession session = this.getProfilerSession();
-		
-		if((session != null) && (session.isActive())) {
-			session.preProfile(entry);
-			
-			Object ret = method.invoke(target, args);
+			Object ret = aroundable.proceed();
 			
 			session.postProfile(entry);
 			
@@ -116,7 +88,7 @@ public class ProfilerManager {
 			return ret;
 		}
 
-		return method.invoke(target, args);
+		return aroundable.proceed();
 	}
 	
 	private ProfilerSession getProfilerSession() {

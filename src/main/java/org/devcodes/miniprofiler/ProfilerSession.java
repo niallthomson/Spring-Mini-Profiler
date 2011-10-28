@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Stack;
 
 import org.devcodes.miniprofiler.entries.IProfilerEntry;
+import org.devcodes.miniprofiler.entries.QueryProfilerEntry;
 
 /**
  * Stores stuff for the current session, as we need separate profiler data
@@ -31,17 +32,18 @@ public class ProfilerSession {
 	}
 	
 	public void preProfile(IProfilerEntry entry) {
+		// TODO: This is dirty dirty, find a better way
+		if(entry instanceof QueryProfilerEntry) {
+			this.currentEntry.addQuery((QueryProfilerEntry)entry);
+		}
+		
 		this.initialiseTiming(entry);
 		
 		this.updateStack(entry);
 	}
 
 	private void initialiseTiming(IProfilerEntry entry) {
-		long startTime = System.currentTimeMillis();
-		entry.setStartTime(startTime);
-		
-		long fromStart = startTime - getRootEntry().getStartTime();
-		entry.setFromStart(fromStart);
+		entry.open(this.getRootEntry().getStartTime());
 	}
 	
 	private void updateStack(IProfilerEntry entry) {
@@ -66,9 +68,7 @@ public class ProfilerSession {
 	}
 	
 	private void finishTiming() {
-		long endTime = System.currentTimeMillis();
-		
-		this.currentEntry.setDuration(endTime - currentEntry.getStartTime());
+		this.currentEntry.close();
 	}
 
 	public void setCurrentEntry(IProfilerEntry entry) {

@@ -33,10 +33,11 @@ devcodes.profiler = (function ($) {
 		_profilerContainer = $('<div/>').appendTo('body').addClass('profiler-container');
 		
 		$.get(config.location+'/profiler.tmpl.htm', function(templates) {
-		  $('head').append(templates);
-		  $('#profilerTemplate').tmpl( _profilerData ).appendTo(_profilerContainer);
-		  $(".show-queries").click(_onShowQueries);
-		  prettyPrint();
+			$('head').append(templates);
+			$('#profilerTemplate').tmpl( _profilerData ).appendTo(_profilerContainer);
+			$(".show-queries").click(_onShowQueries);
+			
+			prettyPrint();
 		});
 	}
 	

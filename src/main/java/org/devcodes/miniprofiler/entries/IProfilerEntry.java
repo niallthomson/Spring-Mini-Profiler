@@ -48,4 +48,8 @@ public interface IProfilerEntry {
 
 	public long getQueryTime();
 
+	public void open(long rootStartTime);
+	
+	public void close();
+
 }

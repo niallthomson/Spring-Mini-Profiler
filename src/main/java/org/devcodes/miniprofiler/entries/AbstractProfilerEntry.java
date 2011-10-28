@@ -128,4 +128,18 @@ public abstract class AbstractProfilerEntry implements IProfilerEntry {
 	public long getQueryTime() {
 		return queryTime;
 	}
+	
+	public void open(long rootStartTime) {
+		long startTime = System.currentTimeMillis();
+		this.setStartTime(startTime);
+		
+		long fromStart = startTime - rootStartTime;
+		this.setFromStart(fromStart);
+	}
+	
+	public void close() {
+		long endTime = System.currentTimeMillis();
+		
+		this.setDuration(endTime - getStartTime());
+	}
 }

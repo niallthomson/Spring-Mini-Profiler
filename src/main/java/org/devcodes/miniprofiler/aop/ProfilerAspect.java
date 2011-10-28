@@ -2,7 +2,6 @@ package org.devcodes.miniprofiler.aop;
 
 import java.util.List;
 
-import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -66,33 +65,37 @@ public class ProfilerAspect {
 	
 	@Around("component() && method() && !service() && !controller() && !repository()")
 	public Object aroundComponentMethod(ProceedingJoinPoint pjp) throws Throwable {
-		return getProfilerManager().profileMethodCall(pjp, "OTHER");
+		return this.profileMethod(pjp, "OTHER");
 	}
 	
 	@Around("repository() && method()")
 	public Object aroundRepositoryMethod(ProceedingJoinPoint pjp) throws Throwable {
-		return getProfilerManager().profileMethodCall(pjp, "REPOSITORY");
+		return this.profileMethod(pjp, "REPOSITORY");
 	}
 	
 	@Around("service() && method()")
 	public Object aroundServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
-		return getProfilerManager().profileMethodCall(pjp, "SERVICE");
+		return this.profileMethod(pjp, "SERVICE");
 	}
 	
 	@Around("controller() && method()")
 	public Object aroundControllerMethod(ProceedingJoinPoint pjp) throws Throwable {
-		return getProfilerManager().profileMethodCall(pjp, "CONTROLLER");
+		return this.profileMethod(pjp, "CONTROLLER");
+	}
+	
+	private Object profileMethod(ProceedingJoinPoint pjp, String tag) throws Throwable {
+		return getProfilerManager().profileMethodCall(new AspectJAroundable(pjp), tag, pjp.getTarget().getClass().getSimpleName(), pjp.getSignature().getName());
 	}
 	
 	@Around("query()")
 	public Object aroundQueryExecution(ProceedingJoinPoint pjp) throws Throwable {
 		List<QueryInfo> queryInfoList = (List<QueryInfo>) pjp.getArgs()[1];
-		return getProfilerManager().profileQueryExecution(pjp, queryInfoList);
+		return getProfilerManager().profileQueryExecution(new AspectJAroundable(pjp), queryInfoList);
 	}
 	
 	@Around("view()")
 	public Object aroundViewRender(ProceedingJoinPoint pjp) throws Throwable {
-		return getProfilerManager().profileViewRender(pjp, "");
+		return getProfilerManager().profileViewRender(new AspectJAroundable(pjp), "");
 	}
 
 	public ProfilerManager getProfilerManager() {
