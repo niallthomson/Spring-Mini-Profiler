@@ -5,7 +5,7 @@ This project is heavily based on the [mvc-mini-profiler](http://code.google.com/
 
 It can be plugged into a Spring project, but right now the focus is on Spring MVC applications in order to provide profiler output right in the browser.
 
-[This is what you'll get](http://www.niallthomson.com/blog/wp-content/uploads/2011/07/profiler-early.png)
+![This is what you'll get](http://www.niallthomson.com/blog/wp-content/uploads/2011/07/profiler-early.png)
 
 Quick Start
 -----------
